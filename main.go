@@ -1,8 +1,17 @@
 package main
 
-import "os"
+import (
+	"log"
+	"os"
+
+	"github.com/joho/godotenv"
+)
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
 	a := App{}
 	a.Initialize(
 		os.Getenv("APP_DB_USERNAME"),
