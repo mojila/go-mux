@@ -53,12 +53,12 @@ func TestGetNonExistentProduct(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/product/11", nil)
 	response := executeRequest(req)
 
-	checkResponseCode(t, http.StatusOK, response.Code)
+	checkResponseCode(t, http.StatusNotFound, response.Code)
 
 	var m map[string]string
 	json.Unmarshal(response.Body.Bytes(), &m)
-	if m["error"] != "Product not found" {
-		t.Errorf("Expected the 'error' key of the response to be set to 'Product not found'.")
+	if m["error"] != "Error product not found" {
+		t.Errorf("Expected the 'error' key of the response to be set to 'Error product not found'. Got '%v'", m["error"])
 	}
 }
 
@@ -105,25 +105,25 @@ func TestUpdateProduct(t *testing.T) {
 	clearTable()
 	addProduct(1)
 
-	req, _ := http.NewRequest("GET", "/product/11", nil)
+	req, _ := http.NewRequest("GET", "/product/1", nil)
 	response := executeRequest(req)
 
 	var originalProduct map[string]interface{}
 	json.Unmarshal(response.Body.Bytes(), &originalProduct)
 
-	var jsonStr = []byte(`{
-        "name": "test product - updated name",
-        "price: 11.22
-    }`)
-	reqUpdate, _ := http.NewRequest("PUT", "/product/11", bytes.NewBuffer(jsonStr))
+	var jsonStr = []byte(`{"name":"test product - updated name", "price": 11.22}`)
+	reqUpdate, _ := http.NewRequest("PUT", "/product/1", bytes.NewBuffer(jsonStr))
 	reqUpdate.Header.Set("Content-Type", "application/json")
 
 	responseUpdate := executeRequest(reqUpdate)
 
 	checkResponseCode(t, http.StatusOK, responseUpdate.Code)
 
+	reqCheck, _ := http.NewRequest("GET", "/product/1", nil)
+	responseCheck := executeRequest(reqCheck)
+
 	var m map[string]interface{}
-	json.Unmarshal(response.Body.Bytes(), &m)
+	json.Unmarshal(responseCheck.Body.Bytes(), &m)
 
 	if m["id"] != originalProduct["id"] {
 		t.Errorf("Expected the id to remain the same (%v). Got (%v)", originalProduct["id"], m["id"])

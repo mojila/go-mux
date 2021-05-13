@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"errors"
 )
 
 type Product struct {
@@ -28,17 +27,33 @@ func (p *Product) deleteProduct(db *sql.DB) error {
 }
 
 func (p *Product) createProduct(db *sql.DB) error {
-	// rows, err := db.QueryRow(
-	// 	"INSERT INTO products(name, price) VALUES($1, $2) RETURNING id",
-	// 	p.Name, p.Price).Scan(&p.ID)
+	result := db.QueryRow("INSERT INTO products(name, price) VALUES($1, $2) RETURNING id", p.Name, p.Price).Scan(&p.ID)
 
-	// if err != nil {
-	// 	return err
-	// }
+	if result != nil {
+		return result
+	}
 
 	return nil
 }
 
 func getProducts(db *sql.DB, start, count int) ([]Product, error) {
-	return nil, errors.New("Not implemented")
+	rows, err := db.Query("SELECT id, name, price FROM products LIMIT $1 OFFSET $2", count, start)
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	products := []Product{}
+
+	for rows.Next() {
+		var p Product
+		if err := rows.Scan(&p.ID, &p.Name, &p.Price); err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+
+	return products, nil
 }
