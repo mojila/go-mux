@@ -112,18 +112,18 @@ func TestUpdateProduct(t *testing.T) {
 	json.Unmarshal(response.Body.Bytes(), &originalProduct)
 
 	var jsonStr = []byte(`{"name":"test product - updated name", "price": 11.22}`)
-	reqUpdate, _ := http.NewRequest("PUT", "/product/1", bytes.NewBuffer(jsonStr))
-	reqUpdate.Header.Set("Content-Type", "application/json")
+	req, _ = http.NewRequest("PUT", "/product/1", bytes.NewBuffer(jsonStr))
+	req.Header.Set("Content-Type", "application/json")
 
-	responseUpdate := executeRequest(reqUpdate)
+	response = executeRequest(req)
 
-	checkResponseCode(t, http.StatusOK, responseUpdate.Code)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-	reqCheck, _ := http.NewRequest("GET", "/product/1", nil)
-	responseCheck := executeRequest(reqCheck)
+	req, _ = http.NewRequest("GET", "/product/1", nil)
+	response = executeRequest(req)
 
 	var m map[string]interface{}
-	json.Unmarshal(responseCheck.Body.Bytes(), &m)
+	json.Unmarshal(response.Body.Bytes(), &m)
 
 	if m["id"] != originalProduct["id"] {
 		t.Errorf("Expected the id to remain the same (%v). Got (%v)", originalProduct["id"], m["id"])
@@ -147,15 +147,15 @@ func TestDeleteProduct(t *testing.T) {
 
 	checkResponseCode(t, http.StatusOK, response.Code)
 
-	reqDelete, _ := http.NewRequest("DELETE", "/product/1", nil)
-	responseDelete := executeRequest(reqDelete)
+	req, _ = http.NewRequest("DELETE", "/product/1", nil)
+	response = executeRequest(req)
 
-	checkResponseCode(t, http.StatusOK, responseDelete.Code)
+	checkResponseCode(t, http.StatusOK, response.Code)
 
-	reqCheck, _ := http.NewRequest("GET", "/product/1", nil)
-	responseCheck := executeRequest(reqCheck)
+	req, _ = http.NewRequest("GET", "/product/1", nil)
+	response = executeRequest(req)
 
-	checkResponseCode(t, http.StatusNotFound, responseCheck.Code)
+	checkResponseCode(t, http.StatusNotFound, response.Code)
 }
 
 func addProduct(count int) {
